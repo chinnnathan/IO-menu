@@ -3,8 +3,7 @@
 #include <stddef.h>
 #include "stdint.h"
 
-template <typename T, size_t N>
-constexpr size_t len(T(&)[N]) { return N; }
+
 
 namespace IO
 {

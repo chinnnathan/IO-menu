@@ -30,6 +30,9 @@
 #include "stdint.h"
 #include "string.h"
 
+template <typename T, size_t N>
+constexpr size_t len(T(&)[N]) { return N; }
+
 using namespace font; // undo this laziness
 
 /* Absolute value */
@@ -134,7 +137,7 @@ class OLED
             0xAF, //--turn on SSD1306 panel
         };
         
-        WriteCommandSet(cmd);
+        WriteCommandSet(cmd, len(cmd));
         
         
 
@@ -168,7 +171,7 @@ class OLED
             0x01,
             ACTIVATE_SCROLL
         };
-        WriteCommandSet(cmd);
+        WriteCommandSet(cmd, len(cmd));
     }
 
 
@@ -183,7 +186,7 @@ class OLED
             0x01,
             ACTIVATE_SCROLL
         };
-        WriteCommandSet(cmd);
+        WriteCommandSet(cmd, len(cmd));
     }
 
     void Scrolldiagright(uint8_t start_row, uint8_t end_row)
@@ -200,7 +203,7 @@ class OLED
             0x01,
             ACTIVATE_SCROLL
         };
-        WriteCommandSet(cmd);
+        WriteCommandSet(cmd, len(cmd));
     }
 
 
@@ -218,7 +221,7 @@ class OLED
             0x01,
             ACTIVATE_SCROLL
         };
-        WriteCommandSet(cmd);
+        WriteCommandSet(cmd, len(cmd));
     }
 
 
@@ -267,7 +270,7 @@ class OLED
         
         for (m = 0; m < GDDRAM_PAGE_NUM; m++) {
             uint8_t cmd[] = {0xB0 + m, 0x00, 0x10};
-            WriteCommandSet(cmd);
+            WriteCommandSet(cmd, len(cmd));
 
             i2cWriteMulti(bus.addr, 0x40, buf.page[m], WIDTH);
         }
@@ -406,11 +409,11 @@ class OLED
     }
     void ON(void) {
         uint8_t cmd[] = { 0x8D, 0x14, 0xAF };
-        WriteCommandSet(cmd);
+        WriteCommandSet(cmd, len(cmd));
     }
     void OFF(void) {
         uint8_t cmd[] = { 0x8D, 0x10, 0xAE };
-        WriteCommandSet(cmd);
+        WriteCommandSet(cmd, len(cmd));
     }
 
     inline void WriteCommand(uint16_t data)
@@ -429,10 +432,15 @@ class OLED
         i2cWriteMulti(bus.addr, 0x40, data, N);
     }
 
-    // template <size_t N>
-    inline void WriteCommandSet(const uint8_t data[])
+    template <size_t N>
+    inline void WriteCommandSet(const uint8_t data[N])
     {
-        i2cWriteMulti(bus.addr, 0x00, (uint8_t*)data, sizeof(data));
+        i2cWriteMulti(bus.addr, 0x00, (uint8_t*)data, N);
+    }
+
+    inline void WriteCommandSet(const uint8_t* data, size_t size)
+    {
+        i2cWriteMulti(bus.addr, 0x00, (uint8_t*)data, size);
     }
 
     virtual void        i2cInit() {};

@@ -16,6 +16,9 @@ namespace IO
     template<typename FontType, typename OledType>
     class SSD1306Menu : public IO::Menu 
     {
+        constexpr uint16_t numLines = 4;
+        constexpr uint16_t offset = 18;
+
         public:
         FontType font;
         OledType *oled;
@@ -58,6 +61,12 @@ namespace IO
         void down()
         {
             active = active->next;
+        }
+
+        //TODO: What if the action has parameters?
+        void enter()
+        {
+            ((T*)(active - active->offset))->action();
         }
     };
 
