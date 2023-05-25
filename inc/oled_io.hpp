@@ -16,14 +16,11 @@ namespace IO
     template<typename FontType, typename OledType>
     class SSD1306Menu : public IO::Menu 
     {
-        constexpr uint16_t numLines = 4;
-        constexpr uint16_t offset = 18;
-
         public:
-        FontType font;
+        FontType* font;
         OledType *oled;
 
-        SSD1306Menu(FontType f, OledType *o) : font(f), oled(o)
+        SSD1306Menu(FontType* f, OledType *o) : font(f), oled(o)
         {
             // if (!oled->Initialized)
             // {
@@ -47,8 +44,8 @@ namespace IO
             oled->Fill(SSD1306::Color::BLACK);
             for(auto i = 0; i < numLines; i ++)
             {
-                writeline(ptr->data, i);
-                ptr = (T*)(ptr->link->next - ptr->link->offset);
+                writeline((char*)ptr->data, i);
+                ptr = (T*)(ptr->link.next - ptr->link.offset);
             }
             oled->UpdateScreen();
         }
@@ -64,9 +61,11 @@ namespace IO
         }
 
         //TODO: What if the action has parameters?
+        template<typename T>
         void enter()
         {
-            ((T*)(active - active->offset))->action();
+            T* ptr = (T*)(active - active->offset);
+            ptr->action();
         }
     };
 

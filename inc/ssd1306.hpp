@@ -97,7 +97,7 @@ class OLED
         i2cInit();
         
         /* Check if LCD connected to I2C */
-        if (!i2cReady(bus.handle, bus.addr, 1, 20000))
+        if (i2cReady(bus.handle, bus.addr, 1, 20000))
             return 1;
         
         /* A little delay */
@@ -138,8 +138,6 @@ class OLED
         };
         
         WriteCommandSet(cmd, len(cmd));
-        
-        
 
         WriteCommand(DEACTIVATE_SCROLL);
 
