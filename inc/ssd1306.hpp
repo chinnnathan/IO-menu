@@ -267,7 +267,7 @@ class OLED
         uint8_t m;
         
         for (m = 0; m < GDDRAM_PAGE_NUM; m++) {
-            uint8_t cmd[] = {0xB0 + m, 0x00, 0x10};
+            uint8_t cmd[] = {static_cast<uint8_t>(0xB0 + m), 0x00, 0x10};
             WriteCommandSet(cmd, len(cmd));
 
             i2cWriteMulti(bus.addr, 0x40, buf.page[m], WIDTH);

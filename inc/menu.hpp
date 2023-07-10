@@ -3,10 +3,26 @@
 #include <stddef.h>
 #include "stdint.h"
 
-
+#include <stdio.h>
 
 namespace IO
 {
+    union MenuInput
+    {
+        struct
+        {
+            uint8_t up          : 1;
+            uint8_t down        : 1;
+            uint8_t right       : 1;
+            uint8_t left        : 1;
+            uint8_t enter       : 1;
+            uint8_t escape      : 1;
+            uint8_t interrupt   : 1;
+            uint8_t error       : 1;
+        };
+        
+        uint8_t all;
+    };
 
     struct Link
     {
@@ -70,15 +86,22 @@ namespace IO
             offset = offsetof(StructType, link);
             return offset;
         }
+
+        template <typename T>
+        T* get_entry()
+        {
+           return (T*)((size_t)this - (size_t)offset);
+        }
+
     };
     
 
     template<typename ValueType, typename ActionType>
     struct Entry
     {
-        Link        link;
         ValueType   data;    //< The IO info that gets displayed in some way. Usually char[n]
         ActionType  action;  //< The IO action that is undertaken when this is activated
+        Link        link;
 
         Entry(ValueType v, ActionType a, Link*p=nullptr, Link* n=nullptr) : data(v), action(a), link(p, n) 
         {   
@@ -86,7 +109,16 @@ namespace IO
         }
     };
 
-    
+    template<typename EntryType, size_t N>
+    void linkEntryArray(EntryType(&arr)[N])
+    {
+        for (uint16_t i = 1; i < N; i++)
+        {
+            arr[i].link.p(&arr[i-1].link);
+        }
+        arr[N-1].link.n(&arr[0].link);
+    }
+  
 
     /**
      * @brief The Menu object will be used to manage the IO linked Entries
@@ -113,8 +145,61 @@ namespace IO
         virtual void right() { }
         virtual void escape() { }
         virtual void enter() { }
+        virtual void interrupt() { }
+        virtual void error() { }
 
-        virtual void draw() { }
+
+        template <typename T>
+        void draw() { }
+
+        template <typename T>
+        void task(MenuInput &in)
+        {
+            if (in.all)
+            {
+                if (in.down)
+                {
+                    down();
+                    in.down = 0;
+                }
+                if (in.up)
+                {
+                    up();
+                    in.up = 0;
+                }
+                if (in.left)
+                {
+                    left();
+                    in.left = 0;
+                }
+                if (in.right)
+                {
+                    right();
+                    in.right = 0;
+                }
+                if (in.enter)
+                {
+                    enter();
+                    in.enter = 0;
+                }
+                if (in.escape)
+                {
+                    escape();
+                    in.escape = 0;
+                }
+                if (in.interrupt)
+                {
+                    interrupt();
+                    in.interrupt = 0;
+                }
+                if (in.error)
+                {
+                    error();
+                    in.error = 0;
+                }
+            }
+            draw<T>();
+        }
     };
 
   /*  template<typename ValueType, typename ActionType, typename ScrollActionType, size_t NumberMenuEntries>

@@ -5,6 +5,6 @@ menu_ut: menu_ut.cpp ../src/menu.cpp
 #	Make an output dir to hold the executable
 	mkdir -p ./output
 #	Build the unit tests
-	g++ -g -Wall -o ./output/menu_ut -I../inc menu_ut.cpp  ../src/fonts.cpp  -DOLED_SSD1306
+	g++ -g -Wall -o ./output/menu_ut -I../inc menu_ut.cpp  ../src/fonts.cpp  -DOLED_SSD1306 -Wformat=0
 clean:
 	rm -drf ./output/*
